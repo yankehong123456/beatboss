@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beat Boss: I'm So Good at It</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        /* 主页样式 */
+        .home-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .game-logo h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .game-logo h2 {
+            font-size: 1.5em;
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .game-description {
+            margin-bottom: 30px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* 游戏页面样式 */
+        .game-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease-out;
+            display: none;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .timer, .score {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .game-area {
+            margin: 80px 0 40px 0;
+            position: relative;
+        }
+
+        .boss-container {
+            position: relative;
+            display: inline-block;
+            z-index: 10;
+        }
+
+        .boss-avatar {
+            font-size: 6em;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .boss-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .boss-avatar:active {
+            transform: scale(0.95);
+        }
+
+        .boss-face {
+            margin-bottom: 10px;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: normal;
+            z-index: 15;
+            max-width: 260px;
+            min-width: 160px;
+            text-align: center;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #333;
+        }
+
+        .speech-bubble.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .game-instructions {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* 结果页面样式 */
+        .result-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease-out;
+            display: none;
+        }
+
+        .result-header h1 {
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+
+        .result-stats {
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .rank-display {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .rank-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .rank-emoji {
+            font-size: 3em;
+            margin: 15px 0;
+        }
+
+        .rank-description {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .play-again-btn, .share-btn, .home-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-again-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .share-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .home-btn {
+            background: #f8f9fa;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .play-again-btn:hover, .share-btn:hover, .home-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .bounce {
+            animation: bounce 0.3s ease-in-out;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .boss-avatar {
+                font-size: 5em;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            .game-area {
+                margin: 60px 0 30px 0;
+            }
+            
+            .result-actions {
+                gap: 10px;
+            }
+            
+            /* 移动端speech bubble样式调整 */
+            .speech-bubble {
+                top: -40px;
+                font-size: 0.7em;
+                max-width: 85%;
+                min-width: 140px;
+                padding: 6px 10px;
+                line-height: 1.1;
+                z-index: 18;
+            }
+            
+            .speech-bubble.show {
+                transform: translateX(-50%) translateY(-3px);
+            }
+        }
+
+        /* Ad placeholder */
+        .ad-slot {
+            width: 100%;
+            height: 60px;
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.8em;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        /* 隐藏页面样式 */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 主页 -->
+        <div class="home-screen screen active" id="homeScreen">
+            <div class="game-logo">
+                <h1>🕹️ Beat Boss</h1>
+                <h2>I'm So Good at It!</h2>
+            </div>
+            <div class="game-description">
+                <p>Click the boss avatar to release stress!</p>
+                <p>Click as many times as possible in 30 seconds</p>
+            </div>
+            <button class="start-btn" onclick="startGame()">Start Game</button>
+            
+            <!-- Ad placeholder -->
+            <div class="ad-slot">
+                Ad Space - AdSense/AdMob
+            </div>
+        </div>
+
+        <!-- 游戏页面 -->
+        <div class="game-screen screen" id="gameScreen">
+            <div class="game-header">
+                <div class="timer">
+                    <span>⏱️ Time: <span id="countdown">30</span>s</span>
+                </div>
+                <div class="score">
+                    <span>🔢 Score: <span id="score">0</span></span>
+                </div>
+            </div>
+            
+            <div class="game-area">
+                <div class="boss-container">
+                    <div class="boss-avatar" id="boss" onclick="hitBoss()">
+                        <div class="boss-face">😠</div>
+                        <div class="boss-body">👔</div>
+                    </div>
+                    <div class="speech-bubble" id="speechBubble"></div>
+                </div>
+            </div>
+            
+            <div class="game-instructions">
+                <p>Click the boss like crazy to release stress!</p>
+            </div>
+        </div>
+
+        <!-- 结果页面 -->
+        <div class="result-screen screen" id="resultScreen">
+            <div class="result-header">
+                <h1>🎉 Game Over!</h1>
+            </div>
+            
+            <div class="result-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Total Hits</div>
+                    <div class="stat-value" id="finalScore">0</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">Stress Relief Score</div>
+                    <div class="stat-value" id="stressScore">0.0</div>
+                </div>
+                
+                <div class="rank-display">
+                    <div class="rank-title" id="rankTitle">Lazy Intern</div>
+                    <div class="rank-emoji" id="rankEmoji">😐</div>
+                    <div class="rank-description" id="rankDescription">Need more effort</div>
+                </div>
+            </div>
+            
+            <div class="result-actions">
+                <button class="play-again-btn" onclick="playAgain()">Play Again</button>
+                <button class="share-btn" onclick="shareScore()">Share Score</button>
+                <button class="home-btn" onclick="goHome()">Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        let gameState = {
+            score: 0,
+            timeLeft: 30,
+            gameTimer: null,
+            isGameActive: false
+        };
+
+        // Boss quotes
+        const bossQuotes = [
+            "Where's my raise, huh?",
+            "Stop scheduling 8am meetings!",
+            "I'm not your therapist!",
+            "Say 'circle back' one more time!",
+            "My PTO was approved!",
+            "Work-life balance? What balance?",
+            "Micromanage THIS!",
+            "No more unpaid overtime!",
+            "Delete my weekend tasks!",
+            "This is for every 'quick sync' ever!",
+            "I'm not paid enough for this!",
+            "That's it, I'm going freelance!",
+            "You can't gaslight me forever!",
+            "Don't CC me on nonsense!",
+            "Get your own coffee!",
+            "One more spreadsheet and I scream!",
+            "I muted you on Slack!",
+            "Take your toxic culture and go!",
+            "Performance review? Review THIS!",
+            "You call this 'leadership'?"
+        ];
+
+        // Ranking system
+        const rankSystem = [
+            { min: 0, max: 49, title: "Lazy Intern", emoji: "😐", description: "Need more effort" },
+            { min: 50, max: 99, title: "Cubicle Warrior", emoji: "🙂", description: "Feeling better" },
+            { min: 100, max: 149, title: "Office Terminator", emoji: "😎", description: "Solid smash" },
+            { min: 150, max: 199, title: "Stress Buster Pro", emoji: "😤", description: "Excellent relief" },
+            { min: 200, max: Infinity, title: "Boss Destroyer", emoji: "🤯", description: "Maximum smash" }
+        ];
+
+        // 页面切换函数
+        function showScreen(screenName) {
+            // 隐藏所有页面
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // 显示指定页面
+            document.getElementById(screenName).classList.add('active');
+        }
+
+        // Start game
+        function startGame() {
+            showScreen('gameScreen');
+            initializeGame();
+        }
+
+        // Initialize game
+        function initializeGame() {
+            gameState.score = 0;
+            gameState.timeLeft = 30;
+            gameState.isGameActive = true;
+            
+            updateDisplay();
+            startTimer();
+            
+            // Add keyboard support
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && gameState.isGameActive) {
+                    e.preventDefault();
+                    hitBoss();
+                }
+            });
+        }
+
+        // Start timer
+        function startTimer() {
+            gameState.gameTimer = setInterval(function() {
+                gameState.timeLeft--;
+                updateDisplay();
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        // Hit boss
+        function hitBoss() {
+            if (!gameState.isGameActive) return;
+            
+            gameState.score++;
+            updateDisplay();
+            
+            // Add animation effect
+            const boss = document.getElementById('boss');
+            boss.classList.add('shake');
+            setTimeout(() => boss.classList.remove('shake'), 300);
+            
+            // Show random quote
+            showBossQuote();
+            
+            // Change boss expression
+            changeBossExpression();
+        }
+
+        // Show boss quote
+        function showBossQuote() {
+            const speechBubble = document.getElementById('speechBubble');
+            if (!speechBubble) {
+                console.error('Speech bubble element not found!');
+                return;
+            }
+            
+            const randomQuote = bossQuotes[Math.floor(Math.random() * bossQuotes.length)];
+            
+            // 确保先清除之前的show类
+            speechBubble.classList.remove('show');
+            
+            // 设置文本内容
+            speechBubble.textContent = randomQuote;
+            
+            // 稍微延迟添加show类，确保过渡动画正常
+            setTimeout(() => {
+                speechBubble.classList.add('show');
+            }, 10);
+            
+            // 设置隐藏的定时器
+            setTimeout(() => {
+                speechBubble.classList.remove('show');
+            }, 2500);
+        }
+
+        // Change boss expression
+        function changeBossExpression() {
+            const bossFace = document.querySelector('.boss-face');
+            const expressions = ['😠', '😡', '🤬', '😤', '😵', '🥴', '😰'];
+            const randomExpression = expressions[Math.floor(Math.random() * expressions.length)];
+            
+            bossFace.textContent = randomExpression;
+            
+            // Restore original expression after 2 seconds
+            setTimeout(() => {
+                bossFace.textContent = '😠';
+            }, 2000);
+        }
+
+        // Update display
+        function updateDisplay() {
+            const countdownElement = document.getElementById('countdown');
+            const scoreElement = document.getElementById('score');
+            
+            if (countdownElement) countdownElement.textContent = gameState.timeLeft;
+            if (scoreElement) scoreElement.textContent = gameState.score;
+        }
+
+        // End game
+        function endGame() {
+            gameState.isGameActive = false;
+            clearInterval(gameState.gameTimer);
+            
+            // Save score to local storage
+            localStorage.setItem('gameScore', gameState.score);
+            localStorage.setItem('gameTime', new Date().toISOString());
+            
+            // Redirect to results page
+            setTimeout(() => {
+                showScreen('resultScreen');
+                displayResults();
+            }, 1000);
+        }
+
+        // Display results
+        function displayResults() {
+            const score = parseInt(localStorage.getItem('gameScore')) || 0;
+            const stressScore = (score / 30).toFixed(1); // Clicks per second
+            
+            // Update score display
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('stressScore').textContent = stressScore;
+            
+            // Calculate rank
+            const rank = calculateRank(score);
+            document.getElementById('rankTitle').textContent = rank.title;
+            document.getElementById('rankEmoji').textContent = rank.emoji;
+            document.getElementById('rankDescription').textContent = rank.description;
+            
+            // Add animation effects
+            animateResults();
+        }
+
+        // Calculate rank
+        function calculateRank(score) {
+            for (let rank of rankSystem) {
+                if (score >= rank.min && score <= rank.max) {
+                    return rank;
+                }
+            }
+            return rankSystem[0]; // Default to first rank
+        }
+
+        // Results page animation
+        function animateResults() {
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('bounce');
+                }, index * 200);
+            });
+        }
+
+        // Play again
+        function playAgain() {
+            showScreen('gameScreen');
+            initializeGame();
+        }
+
+        // Share score
+        function shareScore() {
+            const score = parseInt(localStorage.getItem('gameScore')) || 0;
+            const rank = calculateRank(score);
+            const shareText = `I scored ${score} points in "Beat Boss" game and achieved the rank "${rank.title}"! ${rank.emoji} Can you beat my score?`;
+            
+            if (navigator.share) {
+                // Use native share API (mobile devices)
+                navigator.share({
+                    title: 'Beat Boss - My Score',
+                    text: shareText,
+                    url: window.location.origin
+                });
+            } else {
+                // Copy to clipboard
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        alert('Score copied to clipboard!');
+                    });
+                } else {
+                    // Fallback method
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Score copied to clipboard!');
+                }
+            }
+        }
+
+        // Go home
+        function goHome() {
+            showScreen('homeScreen');
+        }
+
+        // Add touch support (mobile devices)
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.id === 'boss' && gameState.isGameActive) {
+                e.preventDefault();
+                hitBoss();
+            }
+        });
+
+        // Prevent double-tap zoom (mobile devices)
+        document.addEventListener('touchend', function(e) {
+            if (e.target.id === 'boss') {
+                e.preventDefault();
+            }
+        });
+
+        // Page Visibility API - pause game when page is not visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && gameState.isGameActive) {
+                // Pause when page is hidden
+                if (gameState.gameTimer) {
+                    clearInterval(gameState.gameTimer);
+                }
+            } else if (!document.hidden && gameState.isGameActive && gameState.timeLeft > 0) {
+                // Resume when page is visible
+                startTimer();
+            }
+        });
+
+        // Error handling
+        window.addEventListener('error', function(e) {
+            console.error('Game error:', e.error);
+        });
+    </script>
+</body>
+</html> 
